@@ -1,0 +1,6 @@
+[submodule "Plugins/UE5Inventory"]
+	path = Plugins/UE5Inventory
+	url = git@github.com:Synock/UE5Inventory.git
+[submodule "Plugins/UE5DialogAndQuestPlugin"]
+	path = Plugins/UE5DialogAndQuestPlugin
+	url = git@github.com:Synock/UE5DialogAndQuestPlugin.git
