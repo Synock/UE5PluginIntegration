@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Interfaces/GameModeChatInterface.h"
 #include "Interfaces/InventoryGameModeInterface.h"
 #include "PluginIntegrationGameMode.generated.h"
 
 UCLASS(minimalapi)
-class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface
+class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface, public IGameModeChatInterface
 {
 	GENERATED_BODY()
 

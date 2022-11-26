@@ -33,8 +33,21 @@ private:
 
 protected:
 
+	//Pointer to the Inventory component.
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> Inventory;
+
+	//Pointer to the Coin/Purse component.
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UCoinComponent> CoinPurse;
+
+	//Simple example weight management.
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
+	float TotalWeight = 0.f;
+
+	//Weight update function.
+	UFUNCTION()
+	void RecomputeTotalWeight();
 
 public:
 	//------------------------------------------------------------------------------------------------------------------
@@ -44,5 +57,12 @@ public:
 	virtual UInventoryComponent* GetInventoryComponent() override;
 
 	virtual const UInventoryComponent* GetInventoryComponentConst() const override;
+
+	//------------------------------------------------------------------------------------------------------------------
+	// Purse
+	//------------------------------------------------------------------------------------------------------------------
+	virtual UCoinComponent* GetPurseComponent() override;
+
+	virtual const UCoinComponent* GetPurseComponentConst() const override;
 };
 

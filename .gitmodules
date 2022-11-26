@@ -4,3 +4,6 @@
 [submodule "Plugins/UE5DialogAndQuestPlugin"]
 	path = Plugins/UE5DialogAndQuestPlugin
 	url = git@github.com:Synock/UE5DialogAndQuestPlugin.git
+[submodule "Plugins/UE5MultiplayerChatPlugin"]
+	path = Plugins/UE5MultiplayerChatPlugin
+	url = https://github.com/Synock/UE5MultiplayerChatPlugin.git

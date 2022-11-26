@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 APluginIntegrationCharacter::APluginIntegrationCharacter():ACharacterBase()
 {
@@ -46,18 +47,24 @@ APluginIntegrationCharacter::APluginIntegrationCharacter():ACharacterBase()
 
 	if (HasAuthority())
 	{
-		/*CoinPurse = CreateDefaultSubobject<UCoinComponent>("Purse");
+		CoinPurse = CreateDefaultSubobject<UCoinComponent>("Purse");
 		CoinPurse->SetNetAddressable(); // Make DSO components net addressable
 		CoinPurse->SetIsReplicated(true); // Enable replication by default
-		CoinPurse->PurseDispatcher_Server.AddDynamic(this, &APlayerCharacter::RecomputeTotalWeight);
-*/
-
+		CoinPurse->PurseDispatcher_Server.AddDynamic(this, &APluginIntegrationCharacter::RecomputeTotalWeight);
 
 		Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
 		Inventory->SetNetAddressable(); // Make DSO components net addressable
 		Inventory->SetIsReplicated(true); // Enable replication by default
-		Inventory->FullInventoryDispatcher_Server.AddDynamic(this, &APlayerCharacter::RecomputeTotalWeight);
+		Inventory->FullInventoryDispatcher_Server.AddDynamic(this, &APluginIntegrationCharacter::RecomputeTotalWeight);
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationCharacter::RecomputeTotalWeight()
+{
+	// Total weight is the sum of equipment, inventory and coins.
+	TotalWeight = CoinPurse->GetTotalWeight() + Inventory->GetTotalWeight() + Equipment->GetTotalWeight();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -72,4 +79,26 @@ UInventoryComponent* APluginIntegrationCharacter::GetInventoryComponent()
 const UInventoryComponent* APluginIntegrationCharacter::GetInventoryComponentConst() const
 {
 	return Inventory;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+UCoinComponent* APluginIntegrationCharacter::GetPurseComponent()
+{
+	return CoinPurse;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+const UCoinComponent* APluginIntegrationCharacter::GetPurseComponentConst() const
+{
+	return CoinPurse;
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION(APluginIntegrationCharacter, CoinPurse, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(APluginIntegrationCharacter, Inventory, COND_OwnerOnly);
 }
