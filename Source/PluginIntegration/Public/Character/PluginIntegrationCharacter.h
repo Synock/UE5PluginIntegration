@@ -10,7 +10,7 @@
 
 UCLASS(Blueprintable)
 class APluginIntegrationCharacter : public ACharacterBase,
-											   public IInventoryInterface, public IPurseInterface
+                                    public IInventoryInterface, public IPurseInterface
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,6 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 protected:
-
 	//Pointer to the Inventory component.
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> Inventory;
@@ -65,4 +64,3 @@ public:
 
 	virtual const UCoinComponent* GetPurseComponentConst() const override;
 };
-
