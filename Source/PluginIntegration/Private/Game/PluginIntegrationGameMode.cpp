@@ -28,7 +28,7 @@ APluginIntegrationGameMode::APluginIntegrationGameMode()
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FInventoryItem APluginIntegrationGameMode::FetchItemFromID(int32 ID)
+UInventoryItemBase* APluginIntegrationGameMode::FetchItemFromID(int32 ID)
 {
 	if (!ItemMap.Contains(ID))
 	{
@@ -36,15 +36,15 @@ FInventoryItem APluginIntegrationGameMode::FetchItemFromID(int32 ID)
 		return {};
 	}
 
-	FInventoryItem LocalItem = ItemMap.FindChecked(ID);
+	UInventoryItemBase* LocalItem = ItemMap.FindChecked(ID);
 	return LocalItem;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void APluginIntegrationGameMode::RegisterItem(const FInventoryItem& NewItem)
+void APluginIntegrationGameMode::RegisterItem(UInventoryItemBase* NewItem)
 {
-	ItemMap.Add(NewItem.ItemID, NewItem);
+	ItemMap.Add(NewItem->ItemID, NewItem);
 
 	AMainGameState* GS = GetWorld()->GetGameState<AMainGameState>();
 

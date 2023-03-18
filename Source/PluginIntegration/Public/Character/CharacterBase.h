@@ -36,8 +36,4 @@ public:
 	virtual UEquipmentComponent* GetEquipmentComponent() override;
 
 	virtual const UEquipmentComponent* GetEquipmentComponentConst() const override;
-
-	virtual AActor* GetEquipmentOwningActor() override;
-
-	virtual AActor const* GetEquipmentOwningActorConst() const override;
 };

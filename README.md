@@ -6,9 +6,9 @@ Interfaces can be extended to retain the same internal mechanism in the plugin, 
 
 ## Tutorial
 
-Submodule are a great way to include plugins, 
+Submodule are a great way to include plugins, this is how they are linked to this repo. If your plugin floders are empty, you probably forgot the put --recursive during the clone.
 
-# Multiplayer Chat
+# Multiplayer Chat Plugin
 
 Multiplayer chat plugin is available at https://github.com/Synock/UE5MultiplayerChatPlugin
 
@@ -53,12 +53,41 @@ A few custom functions have been implemented to make use of the chat plugin and 
 * AddItemRewardNotification() Display a message when an item is rewarded through quest.
 * GetMOTD() Display a "Message Of The Day" kind of message.
 
-# Inventory
+# Inventory Plugin
 
-## Game mode interface (APluginIntegrationGameMode)
+## Items database
 
-Your game modes should derive from IInventoryGameModeInterface.
+First thing to do in order to setup the inventory plugin is to define the global item database.
 
+This can be done in two ways depending on your needs.
+
+### GameInstance
+If your client ship with the totality of the items infos, or you don't need to able to change items without updating the client, this may be the easiest way.
+Make sure your game instance inherit from 
+
+    public IInventoryGameInstanceInterface
+
+
+### GameMode and GameState
+Alternatively, you can put the item database in the GameMode for the server, and replicate it to clients using the GameState.
+This is slightly trickier because the GameMode functions has to be able to call the GameState functions to replicate the items registration.
+
+See _APluginIntegrationGameMode::RegisterItem(const FInventoryItem& NewItem)_ for an example.
+
+GameMode should derive from
+
+    public IInventoryGameModeInterface
+
+GameState should derive from 
+
+    public IInventoryGameStateInterface
+
+In any case, you have to redefine the two core functions:
+
+      virtual UInventoryItemBase* FetchItemFromID(int32 ID) override;
+      virtual void RegisterItem(UInventoryItemBase* NewItem) override;
+
+From there, item database source will be resolved automatically, starting from the GameInstance if possible then trying GameMode/GameState.
 ## Character / Controller separation
 
 Characters contains the components and the items, while Controller have the functions to equip/ swap / pay etc...
@@ -75,21 +104,25 @@ It is important that any actor capable of equipping items, derive from *IEquipme
 
     virtual UEquipmentComponent* GetEquipmentComponent() = 0;
     virtual const UEquipmentComponent* GetEquipmentComponentConst() const = 0;
-    virtual AActor* GetEquipmentOwningActor() = 0;
-    virtual AActor const* GetEquipmentOwningActorConst() const = 0;
 
 You will need to implement all these functions, but the code given in *ACharacterBase* is sufficient.
 You only need to define an *UEquipmentComponent* as one of the character actor component.
 This component is initialized in the CharacterBase constructor and is replicated.
-You will need to plug Calls from *ItemEquipedDispatcher_Server* and *ItemUnEquipedDispatcher_Server* to you equip/unequip function that handle stats changes.
 
-This is the place where you should override *HandleEquipmentEffect(EEquipmentSlot InSlot, const FInventoryItem& LocalItem)*
- and *HandleUnEquipmentEffect(EEquipmentSlot InSlot, const FInventoryItem& LocalItem)* to take into account armor changes, or any other equipment related modifier.
+You will need to plug calls from *ItemEquipedDispatcher_Server* and *ItemUnEquipedDispatcher_Server* to you equip/unequip function that handle stats changes if any.
 
+This is the place where you should override
+
+    virtual void HandleEquipmentEffect(EEquipmentSlot InSlot, const UInventoryItemEquipable* LocalItem) override;
+	virtual void HandleUnEquipmentEffect(EEquipmentSlot InSlot, const UInventoryItemEquipable* LocalItem) override;
+
+to take into account armor changes, or any other equipment related modifier.
+
+As Equipment play a key role for displaying character elements, it should be replicated to all the clients.
 
 ### Player Character, Inventory and complex coin management
 
-Based of the *CharacterBase*, the main player character (*PluginIntegrationCharacter*) is extending its capability by adding inventory management and coin handling capabilities.
+Based of the *CharacterBase*, the main player character (*PluginIntegrationCharacter*) is extending its capabilities by adding inventory management and coin handling capabilities.
 For this purpose, this class derive from :
 
     public ACharacterBase, public IInventoryInterface, public IPurseInterface
@@ -116,19 +149,20 @@ These functions only send back the *UCoinComponent*  All other Interface functio
 See *APluginIntegrationCharacter* for an example.
 Note that this component possess a *PurseDispatcher_Server* delegate that is used in the example to trigger a server side weight update whenever the coin amount is modified.
 
+Here these two elements only needs to be replicated to the owner, as only the owning client can know of the inventory and purse content.
 
 ## Controller 
 
 IInventoryPlayerInterface is the core of this plugin and contains most of the logic to handle the inventory system.
 
-To help with keeping everything concise, the function
+To help with keeping everything concise, the following function is defined:
 
- 	ACharacterBase* GetMainPlayerCharacter() const
+ 	APluginIntegrationCharacter* GetMainPlayerCharacter() const
 	{
-		return Cast<ACharacterBase>(GetCharacter());
+		return Cast<APluginIntegrationCharacter>(GetCharacter());
 	}
 
-Is defined to allows for a quick access to the CharacterBase previously defined. This Character must have the Inventory, Coin and Equipment components.
+It is defined to allows for a quick access to the APluginIntegrationCharacter previously introduced. This Character ***must have*** the Inventory, Coin and Equipment components.
 
 You will need to redefine a lot of pure virtual functions in order for the inventory to work:
 
@@ -342,5 +376,27 @@ This Interface is 100% blueprint implemented, so digging in it is kind of uneasy
 
 This function must be implemented and is in charge to handle variable bags lookup and storage.
 
+Some other custom interface UI classes are wrapped to handle specific behavior :
+
+    UBagWindow
+    UBookWindow
+
+These classes share the common traits that they are pop on on click, and can be closed.
+However, if UBagWindow stay registered as long as the bag exists, UBookWindow is just a one shot window.
+
+### Main HUD Graph
+
+You will need to define quite a lot of game logic inside your main HUD component.
+
+First to avoid creating data every time a bag is open, a Map <EBagSlot, UBagWindow*> has been created in BP inside the HUD.
+This Map will keep record of bag that were previously opened.
+To handle everything more smoothly the BP function `InitBagWidget` was added, which initialize bag related widget and store in the the map.
+
+![InitBagWidget function](Images/InitBagWidgetFunction.png)
+
+For readability reason, everything related to Inventory/Item management was put in `InventoryGraph` EventGraph.
+
+
+#### Inventory Display/Hide
 
 

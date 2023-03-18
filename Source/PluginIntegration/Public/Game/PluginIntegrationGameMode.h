@@ -20,7 +20,7 @@ protected:
 	//------------------------------------------------------------------------------------------------------------------
 
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory|Item")
-	TMap<int32, FInventoryItem> ItemMap;
+	TMap<int32, UInventoryItemBase*> ItemMap;
 
 public:
 	APluginIntegrationGameMode();
@@ -29,10 +29,10 @@ public:
 	// Inventory
 	//------------------------------------------------------------------------------------------------------------------
 	UFUNCTION(BlueprintCallable)
-	virtual FInventoryItem FetchItemFromID(int32 ID) override;
+	virtual UInventoryItemBase* FetchItemFromID(int32 ID) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void RegisterItem(const FInventoryItem& NewItem) override;
+	virtual void RegisterItem(UInventoryItemBase* NewItem) override;
 
 };
 

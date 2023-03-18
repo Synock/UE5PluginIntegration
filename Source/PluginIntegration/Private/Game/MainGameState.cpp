@@ -11,21 +11,21 @@ void AMainGameState::OnRep_ItemMap()
 
 	for (auto& Item : CompleteItemList)
 	{
-		ItemMap.Emplace(Item.ItemID, Item);
+		ItemMap.Emplace(Item->ItemID, Item);
 	}
 	UE_LOG(LogTemp, Log, TEXT("Repping item map for %d items"), ItemMap.Num());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FInventoryItem AMainGameState::FetchItemFromID(int32 ID)
+UInventoryItemBase* AMainGameState::FetchItemFromID(int32 ID)
 {
 	if (!ItemMap.Contains(ID))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Cannot find any item at ID %d"), ID);
 		return {};
 	}
-	FInventoryItem LocalItem = ItemMap.FindChecked(ID);
+	UInventoryItemBase* LocalItem = ItemMap.FindChecked(ID);
 	return LocalItem;
 }
 
@@ -39,12 +39,12 @@ void AMainGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void AMainGameState::RegisterItem(const FInventoryItem& NewItem)
+void AMainGameState::RegisterItem(UInventoryItemBase* NewItem)
 {
 	if (HasAuthority())
 	{
 		CompleteItemList.Add(NewItem);
-		UE_LOG(LogTemp, Log, TEXT("Adding item %d %s to MGS"), NewItem.ItemID, *NewItem.Name);
+		UE_LOG(LogTemp, Log, TEXT("Adding item %d %s to MGS"), NewItem->ItemID, *NewItem->Name);
 	}
 	else
 	{

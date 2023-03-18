@@ -14,6 +14,7 @@
 #include "Interfaces/GameModeChatInterface.h"
 #include "Interfaces/LootableInterface.h"
 #include "Interfaces/MerchantInterface.h"
+#include "Items/InventoryItemBag.h"
 #include "Net/UnrealNetwork.h"
 
 APluginIntegrationPlayerController::APluginIntegrationPlayerController()
@@ -200,10 +201,10 @@ void APluginIntegrationPlayerController::AddItemLootNotification(int32 ItemID)
 	if (ItemID <= 0)
 		return;
 
-	FInventoryItem LootedItem = UInventoryUtilities::GetItemFromID(ItemID, GetWorld());
+	UInventoryItemBase* LootedItem = UInventoryUtilities::GetItemFromID(ItemID, GetWorld());
 
 	const FString FinalStringSolo = "You have looted a " + FString("<Item id=\"") + FString::FormatAsNumber(ItemID) +
-		FString("\">") + LootedItem.Name + FString("</> ");
+		FString("\">") + LootedItem->Name + FString("</> ");
 	Client_AddChatData(EChatColor::White, EMessageCategories::Misc, FinalStringSolo);
 }
 
@@ -214,10 +215,10 @@ void APluginIntegrationPlayerController::AddItemRewardNotification(int32 ItemID)
 	if (ItemID <= 0)
 		return;
 
-	FInventoryItem LootedItem = UInventoryUtilities::GetItemFromID(ItemID, GetWorld());
+	UInventoryItemBase* LootedItem = UInventoryUtilities::GetItemFromID(ItemID, GetWorld());
 
 	const FString FinalStringSolo = "You have received a " + FString("<Item id=\"") + FString::FormatAsNumber(ItemID) +
-		FString("\">") + LootedItem.Name + FString("</> ");
+		FString("\">") + LootedItem->Name + FString("</> ");
 	AddChatData(EChatColor::White, EMessageCategories::Misc, FinalStringSolo);
 }
 
@@ -757,11 +758,11 @@ void APluginIntegrationPlayerController::Server_PlayerUnequipItem_Implementation
 bool APluginIntegrationPlayerController::Server_PlayerUnequipItem_Validate(int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
                                                               EEquipmentSlot OutSlot)
 {
-	const FInventoryItem ConsideredItem = GetEquipmentForInventory()->GetEquippedItem(OutSlot);
-	if (ConsideredItem.ItemID <= 0)
+	const UInventoryItemEquipable* ConsideredItem = GetEquipmentForInventory()->GetEquippedItem(OutSlot);
+	if (!ConsideredItem || ConsideredItem->ItemID <= 0)
 		return false;
 
-	if (ConsideredItem.Bag)
+	if (const UInventoryItemBag* Bag = Cast<UInventoryItemBag>(ConsideredItem))
 	{
 		if (GetInventoryComponent()->GetBagConst(UInventoryComponent::GetBagSlotFromInventory(OutSlot)).Num() > 0)
 		{
@@ -770,7 +771,7 @@ bool APluginIntegrationPlayerController::Server_PlayerUnequipItem_Validate(int32
 		}
 	}
 
-	return ConsideredItem.ItemID == InItemId;
+	return ConsideredItem->ItemID == InItemId;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -801,19 +802,9 @@ bool APluginIntegrationPlayerController::Server_PlayerEquipItemFromInventory_Val
 		return false;
 	}
 
+	const UInventoryItemEquipable* LocalItem = Cast<UInventoryItemEquipable>(UInventoryUtilities::GetItemFromID(InItemId, GetWorld()));
 
-	if (GetEquipmentForInventory()->GetEquippedItem(InSlot).ItemID > 0)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Target slot is not empty (%d"), InSlot);
-		return false;
-	}
-
-	const FInventoryItem LocalItem = UInventoryUtilities::GetItemFromID(InItemId, GetWorld());
-
-	if (LocalItem.ItemID <= 0)
-		return false;
-
-	if (!LocalItem.Equipable) //other check to be performed here
+	if (!LocalItem || LocalItem->ItemID <= 0)
 		return false;
 
 	return true;
@@ -826,8 +817,8 @@ void APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Implementati
                                                                       int32 SwappedItemId,
                                                                       EEquipmentSlot DraggedOutSlot)
 {
-	FInventoryItem ItemToMove = GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot);
-	FInventoryItem DroppedItem = GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot);
+	const UInventoryItemEquipable* ItemToMove = GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot);
+	const UInventoryItemEquipable* DroppedItem = GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot);
 
 	GetEquipmentForInventory()->GetEquipmentComponent()->RemoveItem(DroppedInSlot);
 	GetEquipmentForInventory()->HandleUnEquipmentEffect(DroppedInSlot, ItemToMove);
@@ -855,14 +846,14 @@ bool APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Validate(int
 	if (DraggedOutSlot == EEquipmentSlot::Unknown)
 		return false;
 
-	if (GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot).ItemID != DroppedItemId)
+	if (GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot)->ItemID != DroppedItemId)
 		return false;
 
-	if (GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot).ItemID != SwappedItemId)
+	if (GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot)->ItemID != SwappedItemId)
 		return false;
 
-	if (GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot).TwoSlotsItem)
-		return GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot).TwoSlotsItem;
+	if (GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot)->TwoSlotsItem)
+		return GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot)->TwoSlotsItem;
 
 	return true;
 }

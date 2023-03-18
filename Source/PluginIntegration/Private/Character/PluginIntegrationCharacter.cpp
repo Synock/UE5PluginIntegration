@@ -94,6 +94,7 @@ const UCoinComponent* APluginIntegrationCharacter::GetPurseComponentConst() cons
 {
 	return CoinPurse;
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 
 void APluginIntegrationCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

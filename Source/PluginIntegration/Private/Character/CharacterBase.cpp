@@ -55,20 +55,6 @@ const UEquipmentComponent* ACharacterBase::GetEquipmentComponentConst() const
 
 //----------------------------------------------------------------------------------------------------------------------
 
-AActor* ACharacterBase::GetEquipmentOwningActor()
-{
-	return this;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
-AActor const* ACharacterBase::GetEquipmentOwningActorConst() const
-{
-	return this;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

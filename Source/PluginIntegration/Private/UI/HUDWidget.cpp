@@ -4,6 +4,7 @@
 #include "UI/HUDWidget.h"
 
 #include "Character/PluginIntegrationCharacter.h"
+#include "Items/InventoryItemBag.h"
 #include "UI/BagWidget.h"
 
 void UHUDWidget::HandleBag(EBagSlot InputBagSlot, UBagWidget* Widget)
@@ -12,11 +13,13 @@ void UHUDWidget::HandleBag(EBagSlot InputBagSlot, UBagWidget* Widget)
 
 	if (const APluginIntegrationCharacter* Character = Cast<APluginIntegrationCharacter>(GetOwningPlayerPawn()))
 	{
-		const FInventoryItem& BagItem = Character->GetEquippedItem(
+		const UInventoryItemEquipable* BagItem = Character->GetEquippedItem(
 			UInventoryComponent::GetInventorySlotFromBagSlot(InputBagSlot));
+		check(BagItem);
 
-		check(BagItem.Bag);
+		const UInventoryItemBag* ActualBagItem = Cast<UInventoryItemBag>(BagItem);
+		check(ActualBagItem);
 
-		Widget->InitBagData(BagItem.Name, BagItem.BagWidth, BagItem.BagHeight, BagItem.BagSize, InputBagSlot);
+		Widget->InitBagData(BagItem->Name, ActualBagItem->BagWidth,  ActualBagItem->BagHeight,  ActualBagItem->BagSize, InputBagSlot);
 	}
 }
