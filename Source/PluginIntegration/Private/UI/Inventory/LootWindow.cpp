@@ -1,4 +1,4 @@
 // Copyright 2023 Maximilien (Synock) Guislain
 
 
-#include "UI/Inventory/BagWindow.h"
+#include "UI/Inventory/LootWindow.h"

@@ -25,12 +25,21 @@ APluginIntegrationPlayerController::APluginIntegrationPlayerController()
 
 //----------------------------------------------------------------------------------------------------------------------
 
+TArray<APluginIntegrationCharacter*> APluginIntegrationPlayerController::GetGroupMembers()
+{
+	return {};
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 void APluginIntegrationPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	// For edge cases where the PlayerState is repped before the Hero is possessed.
 	CreateHUD();
 }
+
+//----------------------------------------------------------------------------------------------------------------------
 
 void APluginIntegrationPlayerController::CreateHUD()
 {
@@ -227,7 +236,13 @@ void APluginIntegrationPlayerController::AddItemRewardNotification(int32 ItemID)
 void APluginIntegrationPlayerController::GetMOTD()
 {
 	Client_AddChatDataType(EGlobalMessageType::ServerAnnouncement,
-	                       "Welcome to the Plugin Integration example. check out https://github.com/Synock/ for more info");
+	                       "Welcome to the Plugin Integration example. Check out https://github.com/Synock/ for more info.");
+
+	Client_AddChatDataType(EGlobalMessageType::ServerAnnouncement,
+	                       "Press I to display Inventory");
+
+	Client_AddChatDataType(EGlobalMessageType::ServerAnnouncement,
+	                       "Press E to interact with stuff");
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -700,7 +715,8 @@ void APluginIntegrationPlayerController::Server_PlayerAutoLootAll_Implementation
 	if (!LootedActor)
 		return;
 
-	TArray<FMinimalItemStorage> CopyArray = Cast<ILootableInterface>(LootedActor)->GetLootPoolComponent()->GetBagConst();
+	TArray<FMinimalItemStorage> CopyArray = Cast<ILootableInterface>(LootedActor)->GetLootPoolComponent()->
+		GetBagConst();
 
 	EEquipmentSlot TriedSlot = EEquipmentSlot::Unknown;
 	EBagSlot TriedBag = EBagSlot::Unknown;
@@ -727,8 +743,9 @@ void APluginIntegrationPlayerController::Server_PlayerAutoLootAll_Implementation
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void APluginIntegrationPlayerController::Server_PlayerMoveItem_Implementation(int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
-                                                                 int32 OutTopLeft, EBagSlot OutSlot)
+void APluginIntegrationPlayerController::Server_PlayerMoveItem_Implementation(
+	int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
+	int32 OutTopLeft, EBagSlot OutSlot)
 {
 	PlayerRemoveItem(OutTopLeft, OutSlot);
 	PlayerAddItem(InTopLeft, InSlot, InItemId);
@@ -736,16 +753,18 @@ void APluginIntegrationPlayerController::Server_PlayerMoveItem_Implementation(in
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool APluginIntegrationPlayerController::Server_PlayerMoveItem_Validate(int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
-                                                           int32 OutTopLeft, EBagSlot OutSlot)
+bool APluginIntegrationPlayerController::Server_PlayerMoveItem_Validate(int32 InTopLeft, EBagSlot InSlot,
+                                                                        int32 InItemId,
+                                                                        int32 OutTopLeft, EBagSlot OutSlot)
 {
 	return PlayerGetItem(OutTopLeft, OutSlot) == InItemId;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void APluginIntegrationPlayerController::Server_PlayerUnequipItem_Implementation(int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
-                                                                    EEquipmentSlot OutSlot)
+void APluginIntegrationPlayerController::Server_PlayerUnequipItem_Implementation(
+	int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
+	EEquipmentSlot OutSlot)
 {
 	GetEquipmentForInventory()->HandleUnEquipmentEffect(
 		OutSlot, GetEquipmentForInventory()->GetEquipmentComponent()->GetItemAtSlot(OutSlot));
@@ -755,8 +774,9 @@ void APluginIntegrationPlayerController::Server_PlayerUnequipItem_Implementation
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool APluginIntegrationPlayerController::Server_PlayerUnequipItem_Validate(int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
-                                                              EEquipmentSlot OutSlot)
+bool APluginIntegrationPlayerController::Server_PlayerUnequipItem_Validate(
+	int32 InTopLeft, EBagSlot InSlot, int32 InItemId,
+	EEquipmentSlot OutSlot)
 {
 	const UInventoryItemEquipable* ConsideredItem = GetEquipmentForInventory()->GetEquippedItem(OutSlot);
 	if (!ConsideredItem || ConsideredItem->ItemID <= 0)
@@ -802,7 +822,8 @@ bool APluginIntegrationPlayerController::Server_PlayerEquipItemFromInventory_Val
 		return false;
 	}
 
-	const UInventoryItemEquipable* LocalItem = Cast<UInventoryItemEquipable>(UInventoryUtilities::GetItemFromID(InItemId, GetWorld()));
+	const UInventoryItemEquipable* LocalItem = Cast<UInventoryItemEquipable>(
+		UInventoryUtilities::GetItemFromID(InItemId, GetWorld()));
 
 	if (!LocalItem || LocalItem->ItemID <= 0)
 		return false;
@@ -813,9 +834,10 @@ bool APluginIntegrationPlayerController::Server_PlayerEquipItemFromInventory_Val
 //----------------------------------------------------------------------------------------------------------------------
 
 
-void APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Implementation(int32 DroppedItemId, EEquipmentSlot DroppedInSlot,
-                                                                      int32 SwappedItemId,
-                                                                      EEquipmentSlot DraggedOutSlot)
+void APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Implementation(
+	int32 DroppedItemId, EEquipmentSlot DroppedInSlot,
+	int32 SwappedItemId,
+	EEquipmentSlot DraggedOutSlot)
 {
 	const UInventoryItemEquipable* ItemToMove = GetEquipmentForInventory()->GetEquippedItem(DroppedInSlot);
 	const UInventoryItemEquipable* DroppedItem = GetEquipmentForInventory()->GetEquippedItem(DraggedOutSlot);
@@ -833,9 +855,10 @@ void APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Implementati
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Validate(int32 DroppedItemId, EEquipmentSlot DroppedInSlot,
-                                                                int32 SwappedItemId,
-                                                                EEquipmentSlot DraggedOutSlot)
+bool APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Validate(
+	int32 DroppedItemId, EEquipmentSlot DroppedInSlot,
+	int32 SwappedItemId,
+	EEquipmentSlot DraggedOutSlot)
 {
 	UE_LOG(LogTemp, Log, TEXT("Validating equipment swap from %d item %d to %d item %d"), DraggedOutSlot, SwappedItemId,
 	       DroppedInSlot, DroppedItemId);
@@ -861,9 +884,9 @@ bool APluginIntegrationPlayerController::Server_PlayerSwapEquipment_Validate(int
 //----------------------------------------------------------------------------------------------------------------------
 
 void APluginIntegrationPlayerController::Server_TransferCoinTo_Implementation(UCoinComponent* GivingComponent,
-																 UCoinComponent* ReceivingComponent,
-																 const FCoinValue& RemovedCoinValue,
-																 const FCoinValue& AddedCoinValue)
+                                                                              UCoinComponent* ReceivingComponent,
+                                                                              const FCoinValue& RemovedCoinValue,
+                                                                              const FCoinValue& AddedCoinValue)
 {
 	GetMainPlayerCharacter()->TransferCoinsTo(GivingComponent, ReceivingComponent, RemovedCoinValue, AddedCoinValue);
 }
@@ -871,9 +894,9 @@ void APluginIntegrationPlayerController::Server_TransferCoinTo_Implementation(UC
 //----------------------------------------------------------------------------------------------------------------------
 
 bool APluginIntegrationPlayerController::Server_TransferCoinTo_Validate(UCoinComponent* GivingComponent,
-														   UCoinComponent* ReceivingComponent,
-														   const FCoinValue& RemovedCoinValue,
-														   const FCoinValue& AddedCoinValue)
+                                                                        UCoinComponent* ReceivingComponent,
+                                                                        const FCoinValue& RemovedCoinValue,
+                                                                        const FCoinValue& AddedCoinValue)
 {
 	if (ReceivingComponent->GetOwner() != this && ReceivingComponent->GetOwner() != GetMainPlayerCharacter())
 		return false;
@@ -885,7 +908,8 @@ bool APluginIntegrationPlayerController::Server_TransferCoinTo_Validate(UCoinCom
 //----------------------------------------------------------------------------------------------------------------------
 
 
-void APluginIntegrationPlayerController::Server_PlayerAutoEquipItem_Implementation(int32 InTopLeft, EBagSlot InSlot, int32 InItemId)
+void APluginIntegrationPlayerController::Server_PlayerAutoEquipItem_Implementation(
+	int32 InTopLeft, EBagSlot InSlot, int32 InItemId)
 {
 	EEquipmentSlot SlotToEquip;
 	if (!PlayerTryAutoEquip(InItemId, SlotToEquip))
@@ -896,7 +920,8 @@ void APluginIntegrationPlayerController::Server_PlayerAutoEquipItem_Implementati
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool APluginIntegrationPlayerController::Server_PlayerAutoEquipItem_Validate(int32 InTopLeft, EBagSlot InSlot, int32 InItemId)
+bool APluginIntegrationPlayerController::Server_PlayerAutoEquipItem_Validate(
+	int32 InTopLeft, EBagSlot InSlot, int32 InItemId)
 {
 	const int32 ActualItemID = PlayerGetItem(InTopLeft, InSlot);
 
@@ -985,7 +1010,8 @@ bool APluginIntegrationPlayerController::Server_TransferStagingToActor_Validate(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void APluginIntegrationPlayerController::Server_MoveEquipmentToStagingArea_Implementation(int32 InItemId, EEquipmentSlot OutSlot)
+void APluginIntegrationPlayerController::Server_MoveEquipmentToStagingArea_Implementation(
+	int32 InItemId, EEquipmentSlot OutSlot)
 {
 	StagingAreaItems->AddItemToStagingArea(InItemId);
 	GetEquipmentForInventory()->UnequipItem(OutSlot);
@@ -993,7 +1019,8 @@ void APluginIntegrationPlayerController::Server_MoveEquipmentToStagingArea_Imple
 
 //----------------------------------------------------------------------------------------------------------------------
 
-bool APluginIntegrationPlayerController::Server_MoveEquipmentToStagingArea_Validate(int32 InItemId, EEquipmentSlot OutSlot)
+bool APluginIntegrationPlayerController::Server_MoveEquipmentToStagingArea_Validate(
+	int32 InItemId, EEquipmentSlot OutSlot)
 {
 	return true;
 }

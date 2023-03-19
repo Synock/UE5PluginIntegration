@@ -366,6 +366,26 @@ Don't forget to add the GetLifetimeReplicatedProps defined to ensure that needed
     DOREPLIFETIME_CONDITION(APluginIntegrationPlayerController, BankComponent, COND_OwnerOnly);
     DOREPLIFETIME_CONDITION(APluginIntegrationPlayerController, BankCoin, COND_OwnerOnly);
     }
+
+## LootableInterfaceExtended
+
+The fact that this is a multi plugin integration project offers a good opportunity to extend some of the inventory interface beyond their original capability.
+This is done here by extending the `LootableInterface` by the `LootableInterfaceExtended` class.
+
+This class override the original class `StartLooting(AActor* Looter)` and does things a bit differently.
+Instead of just dumping all the coins to the original looter, the chat message is changed and a fair share of coin is given to each group members.
+
+## LootableActor and LootableChest
+
+LootableActor is, as its name suggests, the base class for lootable actors. It extend `ILootableInterfaceExtended` and contains a pool of lootable items and lootable coins.
+It also contains two blueprint implementable events `BlueprintableStartLoot` and `BlueprintableStopLoot` that are called during `StartLoot` and `StopLoot` interface classes to allow some blueprint operation to be performed at a small cost.
+
+This class is directly derived from `ALootableActor` and is a small chest containing items and/or coins that can be looted by players.
+The initialization of the chest content and appearance is done in its blueprint version.
+Its interaction mechanism is quite simple and limited but make use of the ChatPlugin to display infos on players.
+
+
+
 ## HUD component
 
 The player HUD component is expected to implement InventoryHUDInterface.
@@ -384,7 +404,15 @@ Some other custom interface UI classes are wrapped to handle specific behavior :
 These classes share the common traits that they are pop on on click, and can be closed.
 However, if UBagWindow stay registered as long as the bag exists, UBookWindow is just a one shot window.
 
-### Main HUD Graph
+### Loot window
+
+A loot window is necessary to handle player looting from loot containers.
+
+![LootWindow](Images/LootWindow.png)
+
+This class is actually only defining stuff in blueprint, such as the loot container name display, and most importantly, the close button action.
+
+### Main HUD graph
 
 You will need to define quite a lot of game logic inside your main HUD component.
 
@@ -397,6 +425,40 @@ To handle everything more smoothly the BP function `InitBagWidget` was added, wh
 For readability reason, everything related to Inventory/Item management was put in `InventoryGraph` EventGraph.
 
 
-#### Inventory Display/Hide
+#### Inventory display/hide
+
+As it may be advisable to not keep the inventory visible at all time, two functions are expected to handle visibility change. A defined visibility and a toggle event.
+
+![Inventory Display/Hide events](Images/InventoryDisplayHide.png)
+
+#### Inventory refresh
+Because it's always handy to be able to force the refresh (even if it should be automatic) there's an event that does exactly that.
+
+![Inventory Refresh event](Images/InventoryRefresh.png)
+
+#### Book display
+
+Book or text containing items display is a bit of a special case.
+Event template take the item to display, and its screen coordinates.
+First thing this event do is check that the item requested is actually something clickable.
+Then the book widget is created and the item specific text is setup just before it is added to the viewport.
+
+![BookDisplay event](Images/BookDisplay.png)
+
+#### Bag Functions
+
+Several events must be defined to handle bag display, bag hiding, bag unequiping and bag display toggle. All that taking the widget cache into account.
+
+![Bag related events](Images/BagFunctions.png)
+
+#### Loot functions
+
+Two events must handle loot screen display and hiding.
+
+The event `Display Loot Screen`, which initialize looting context and display looting window and visibility.
+
+The event `Hide Loot Screen`, which de-initialize the looting context and hide the looting window.
+
+![Loot events](Images/LootEvent.png)
 
 

@@ -34,6 +34,9 @@ public:
 
 	//This is based more or less on the method showed in GASDocumentation (https://github.com/tranek/GASDocumentation)
 	void CreateHUD();
+	
+	int32 GetGroupID() const {return GroupID;}
+	TArray<APluginIntegrationCharacter*> GetGroupMembers();
 
 protected:
 
