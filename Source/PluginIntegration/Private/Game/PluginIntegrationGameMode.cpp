@@ -24,6 +24,12 @@ APluginIntegrationGameMode::APluginIntegrationGameMode()
 	{
 		PlayerControllerClass = PlayerControllerBPClass.Class;
 	}
+
+	if (HasAuthority())
+	{
+		DialogComponent = CreateDefaultSubobject<UDialogMainComponent>("DialogMainComponent");
+		QuestComponent = CreateDefaultSubobject<UQuestMainComponent>("QuestMainComponent");
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

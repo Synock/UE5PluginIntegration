@@ -16,7 +16,7 @@
 class UNiagaraSystem;
 
 UCLASS()
-class APluginIntegrationPlayerController : public APlayerController, public IPlayerChatInterface, public IInventoryPlayerInterface
+class APluginIntegrationPlayerController : public APlayerController, public IPlayerChatInterface, public IInventoryPlayerInterface,  public IDialogDisplayInterface
 {
 	GENERATED_BODY()
 
@@ -118,6 +118,16 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category="Chat")
 	void GetMOTD();
+
+
+	//------------------------------------------------------------------------------------------------------------------
+	// Dialog
+	//------------------------------------------------------------------------------------------------------------------
+	UFUNCTION(Client, Unreliable)
+	virtual void ForceDisplayTextInDialog(const FString& TextString) override;
+
+	UFUNCTION(BlueprintCallable)
+	void DialogInteract(AActor* Target);
 
 	//------------------------------------------------------------------------------------------------------------------
 	// Inventory

@@ -53,6 +53,45 @@ A few custom functions have been implemented to make use of the chat plugin and 
 * AddItemRewardNotification() Display a message when an item is rewarded through quest.
 * GetMOTD() Display a "Message Of The Day" kind of message.
 
+
+
+
+
+
+
+# Dialog and Quest Plugin
+
+## Summary
+This plugin is an old school dialog system based on topic. It is inspired in its look and feel from the dialog system of Morrowind. It also includes a basic quest system, with a simple quest journal.
+
+The two are linked together because of the way quest progression is tied to dialog topics and dialog topics can be tied to quest condition. However, the dialog system is totally standalone and does not need the quest to work as intended.
+
+Its underlying philosophy is to be replicated on a dedicated server environment and keep as much information as possible on the server side.
+
+## Dialog system
+
+There are 2 main interfaces and 2 actor component related to the dialog system. Each go as a pair and we will only consider the actor component, but the key idea is that an actor having the component should also implement the interface. Another interface (IDialogDisplayInterface) is only related to displaying the UI.
+
+### DialogGameModeInterface and DialogMainComponent
+This is an actor component and interface that should be implemented by the game mode to handle dialog mastering. The interface is just a getter for the `DialogMainComponent`.
+
+The `DialogMainComponent` contains lookup tables and data for all the dialog topic, bundle and meta bundle. It also contains a set of helper functions to fetch needed data. As this part is intended to be only defined on the GameMode, it is build to exist only on the server side.
+
+During the GameMode initialization, you are expected to fill up the data table regarding the dialog. This was designed to load dialog data from a database upon server launch, but loading from a local data table is also possible.
+
+### DialogComponent and DialogInterface
+This actor component/Interface pair is meant to be added to actors that can trigger a dialog. The interface require to redefine a minimal amount of functions, related to relationship of actor toward the player and a simple getter for the component.
+
+See DialogActor in the demo project for a use example.
+
+This component contains the dialog data and the lookup tables concerning one particular actor. This component will be replicated with the actor, embedding all its dialog data.
+
+### DialogDisplayInterface
+This interface is meant to handle several signals from the game to reflect on the dialog window. It can be implemented in blueprint and is destined to the player controller.
+
+
+
+
 # Inventory Plugin
 
 ## Items database
@@ -385,7 +424,6 @@ The initialization of the chest content and appearance is done in its blueprint 
 Its interaction mechanism is quite simple and limited but make use of the ChatPlugin to display infos on players.
 
 
-
 ## HUD component
 
 The player HUD component is expected to implement InventoryHUDInterface.
@@ -460,5 +498,7 @@ The event `Display Loot Screen`, which initialize looting context and display lo
 The event `Hide Loot Screen`, which de-initialize the looting context and hide the looting window.
 
 ![Loot events](Images/LootEvent.png)
+
+
 
 

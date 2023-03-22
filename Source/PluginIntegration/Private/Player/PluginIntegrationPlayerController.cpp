@@ -11,6 +11,7 @@
 #include "Components/LootPoolComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
+#include "Interfaces/DialogInterface.h"
 #include "Interfaces/GameModeChatInterface.h"
 #include "Interfaces/LootableInterface.h"
 #include "Interfaces/MerchantInterface.h"
@@ -243,6 +244,24 @@ void APluginIntegrationPlayerController::GetMOTD()
 
 	Client_AddChatDataType(EGlobalMessageType::ServerAnnouncement,
 	                       "Press E to interact with stuff");
+}
+
+//------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationPlayerController::DialogInteract(AActor* Target)
+{
+	IDialogInterface* TargetInterface = Cast<IDialogInterface>(Target);
+	if (TargetInterface && TargetInterface->HasDialog() && !UIHUDWidget->IsDialogDisplayed())
+	{
+		UIHUDWidget->Execute_CreateDialogWindow(UIHUDWidget, TargetInterface->GetDialogComponent(), Target);
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationPlayerController::ForceDisplayTextInDialog_Implementation(const FString& TextString)
+{
+	UIHUDWidget->ForceDisplayTextInDialog(TextString);
 }
 
 //------------------------------------------------------------------------------------------------------------------

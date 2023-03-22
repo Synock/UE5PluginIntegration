@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Interfaces/DialogGameModeInterface.h"
 #include "Interfaces/GameModeChatInterface.h"
 #include "Interfaces/InventoryGameModeInterface.h"
 #include "PluginIntegrationGameMode.generated.h"
 
 UCLASS(minimalapi)
-class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface, public IGameModeChatInterface
+class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface, public IGameModeChatInterface, public IDialogGameModeInterface
 {
 	GENERATED_BODY()
 
@@ -22,7 +23,18 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory|Item")
 	TMap<int32, UInventoryItemBase*> ItemMap;
 
+	//------------------------------------------------------------------------------------------------------------------
+	// Dialogs
+	//------------------------------------------------------------------------------------------------------------------
+	UPROPERTY(BlueprintReadWrite, Category = "Dialog")
+	TObjectPtr<UDialogMainComponent> DialogComponent;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Quest")
+	TObjectPtr<UQuestMainComponent> QuestComponent;
+
+
 public:
+
 	APluginIntegrationGameMode();
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -33,6 +45,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void RegisterItem(UInventoryItemBase* NewItem) override;
+
+	//------------------------------------------------------------------------------------------------------------------
+	// Dialogs
+	//------------------------------------------------------------------------------------------------------------------
+
+	virtual UDialogMainComponent* GetMainDialogComponent() override { return DialogComponent; }
+
+	virtual UQuestMainComponent* GetMainQuestComponent() override { return QuestComponent; }
 
 };
 
