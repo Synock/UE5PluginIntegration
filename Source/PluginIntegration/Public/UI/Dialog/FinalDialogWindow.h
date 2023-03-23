@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UObject/Object.h"
 #include "FinalDialogWindow.generated.h"
 
 class UDialogWindow;

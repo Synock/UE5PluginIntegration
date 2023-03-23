@@ -8,6 +8,7 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Character/PluginIntegrationCharacter.h"
+#include "Components/BankComponent.h"
 #include "Components/LootPoolComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -17,11 +18,32 @@
 #include "Interfaces/MerchantInterface.h"
 #include "Items/InventoryItemBag.h"
 #include "Net/UnrealNetwork.h"
+#include <TimerManager.h>
 
 APluginIntegrationPlayerController::APluginIntegrationPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
+
+	if (HasAuthority())
+	{
+
+		StagingAreaCoin = CreateDefaultSubobject<UCoinComponent>("StagingAreaCoin");
+		StagingAreaCoin->SetNetAddressable();
+		StagingAreaCoin->SetIsReplicated(true);
+
+		StagingAreaItems = CreateDefaultSubobject<UStagingAreaComponent>("StagingAreaItems");
+		StagingAreaItems->SetNetAddressable();
+		StagingAreaItems->SetIsReplicated(true);
+
+		BankCoin = CreateDefaultSubobject<UCoinComponent>("BankCoin");
+		BankCoin->SetNetAddressable();
+		BankCoin->SetIsReplicated(true);
+
+		BankComponent = CreateDefaultSubobject<UBankComponent>("BankComponent");
+		BankComponent->SetNetAddressable();
+		BankComponent->SetIsReplicated(true);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------

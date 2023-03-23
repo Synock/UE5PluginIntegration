@@ -46,6 +46,7 @@ public:
 
 	virtual bool HasDialog() const override {return Dialog != nullptr && DialogMetaBundleID != 0;}
 
+	UFUNCTION(BlueprintCallable)
 	void InitDialog();
 
 	virtual bool CanTrade() const override;
