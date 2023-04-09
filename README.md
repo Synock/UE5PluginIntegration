@@ -450,6 +450,17 @@ A loot window is necessary to handle player looting from loot containers.
 
 This class is actually only defining stuff in blueprint, such as the loot container name display, and most importantly, the close button action.
 
+### Merchant Window
+
+In this project the merchant window is integrated using the dialog plugin, however, it is entirely possible to have a standalone merchant window.
+Basically, we must initialize the UI of the underlying merchant widget. We use the original plugin widget as is here, but you could also subclass it to fit your needs.
+
+![Merchant Widget init](Images/MerchantWidget.png)
+
+Here we make use of the Chat plugin to display information to the player when the transaction with the merchant fails, if the player does not have enough money, not enough room, or if the merchant cannot afford to buy something.
+![Merchant Widget chat](Images/MerchantWidgetChat.png)
+
+
 ### Main HUD graph
 
 You will need to define quite a lot of game logic inside your main HUD component.
@@ -499,6 +510,33 @@ The event `Hide Loot Screen`, which de-initialize the looting context and hide t
 
 ![Loot events](Images/LootEvent.png)
 
+#### Merchant functions
+
+Due to the quite complex actions performed when buying/ selling stuff, two functions are defined.
+
+##### HandleMerchantInteraction
+
+Is the function called when an interaction attempt is triggered with an actor. This implementation make use of the dialog plugin to display merchant window within the dialog window.
+However, it is possible to handle everything directly by skipping all the dialog related stuff.
+This function is responsible for the initilization of the merchant widget.
+
+First step is to check the actor can display a dialog window.
+![Merchant dialog1](Images/MerchantDialog.png)
+
+Then we check if the dialog window exist or if we need to create it.
+![Merchant dialog3](Images/MerchantWindowCreate.png)
+
+Last step (and most important one) is to actually initialize the merchant window using the merchant data. This is done by calling the `InitMerchantData` function forwarding the actor.
+![Merchant dialog4](Images/MerchantWindowInit.png)
+
+##### HandleMerchantDeinit
+
+After the dialog window is closed by the player, we must De-Initiliaze everything.
+If we don't consider anything related to the dialog setup, we can only call the `DeInitMerchantData` function.
+![Merchant Deinit](Images/MerchantDeInit.png)
+
+Once these functions are setup, we can override the following blueprint event to ensure the merchant workflow will work.
+![Merchant Functions](Images/MerchantEventGraph.png)
 
 
 
