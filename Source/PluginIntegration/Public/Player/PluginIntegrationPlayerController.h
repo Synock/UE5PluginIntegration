@@ -252,7 +252,7 @@ protected:
 	// Inventory -- Server
 	//------------------------------------------------------------------------------------------------------------------
 
-	UFUNCTION(Server, Reliable, WithValidation, Category = "Neverquest|Inventory")
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
 	virtual void Server_PlayerMoveItem(int32 InTopLeft, EBagSlot InSlot, int32 InItemId, int32 OutTopLeft,
 	                                   EBagSlot OutSlot) override;
 
@@ -272,7 +272,7 @@ protected:
 	virtual void Server_TransferCoinTo(UCoinComponent* GivingComponent, UCoinComponent* ReceivingComponent,
 		const FCoinValue& RemovedCoinValue, const FCoinValue& AddedCoinValue) override;
 
-	UFUNCTION(Server, Reliable, WithValidation, Category = "Neverquest|Inventory")
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
 	virtual void Server_PlayerAutoEquipItem(int32 InTopLeft, EBagSlot InSlot, int32 InItemId) override;
 
 	//------------------------------------------------------------------------------------------------------------------
