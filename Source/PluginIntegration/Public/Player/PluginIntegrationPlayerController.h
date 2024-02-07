@@ -275,6 +275,12 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
 	virtual void Server_PlayerAutoEquipItem(int32 InTopLeft, EBagSlot InSlot, int32 InItemId) override;
 
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
+	virtual void Server_DropItemFromInventory(int32 TopLeft, EBagSlot Slot, FVector DropLocation = {}) override;
+
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
+	virtual void Server_DropItemFromEquipment(EEquipmentSlot Slot, FVector DropLocation = {}) override;
+
 	//------------------------------------------------------------------------------------------------------------------
 	// Staging -- Server
 	//------------------------------------------------------------------------------------------------------------------
@@ -291,6 +297,14 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory|Staging")
 	virtual void Server_MoveInventoryItemToStagingArea(int32 InItemId, int32 OutTopLeft, EBagSlot OutSlot) override;
 
+	//------------------------------------------------------------------------------------------------------------------
+	// Keys
+	//------------------------------------------------------------------------------------------------------------------
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory|Key")
+	virtual void Server_PlayerAddKeyFromInventory(int32 InTopLeft, EBagSlot InSlot, int32 InItemId) override;
+
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory|Key")
+	virtual void Server_PlayerRemoveKeyToInventory(int32 KeyId) override;
 };
 
 

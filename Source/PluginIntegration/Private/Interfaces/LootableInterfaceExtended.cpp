@@ -34,7 +34,7 @@ void ILootableInterfaceExtended::StartLooting(AActor* Looter)
 
 	if (TotalCoinValue != 0.f)
 	{
-		if (Controller->GetGroupID() > 0)
+		if (Controller->GetGroupID() > 0 && Controller->GetGroupMembers().Num())
 		{
 			const float CoinPart = TotalCoinValue / Controller->GetGroupMembers().Num();
 

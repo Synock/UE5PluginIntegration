@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Game/PluginIntegrationGameMode.h"
+
+#include "Actors/DroppedCoins.h"
+#include "Actors/DroppedItem.h"
 #include "Player/PluginIntegrationPlayerController.h"
 #include "Character/PluginIntegrationCharacter.h"
 #include "Game/MainGameState.h"
@@ -62,4 +65,55 @@ void APluginIntegrationGameMode::RegisterItem(UInventoryItemBase* NewItem)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Cannot register item as MGS is invalid"));
 	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+ADroppedItem* APluginIntegrationGameMode::SpawnItemFromActor(AActor* SpawningActor, uint32 ItemID,
+	const FVector& DesiredDropLocation, bool ClampOnGround)
+{
+	if (!SpawningActor)
+		return nullptr;
+
+	if (ItemID <= 0)
+		return nullptr;
+
+	const FVector SpawnLocation = GetItemSpawnLocation(SpawningActor, DesiredDropLocation, ClampOnGround);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	UInventoryItemBase* ItemToSpawn = FetchItemFromID(ItemID);
+
+	ADroppedItem* Item = GetWorld()->SpawnActor<ADroppedItem>(SpawnLocation, SpawningActor->GetActorRotation(),
+																SpawnParams);
+	Item->SetReplicates(true);
+	Item->InitializeFromItem(ItemToSpawn);
+	return Item;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+ADroppedCoins* APluginIntegrationGameMode::SpawnCoinsFromActor(AActor* SpawningActor, const FCoinValue& CoinValue,
+	const FVector& DesiredDropLocation, bool ClampOnGround)
+{
+	if (!SpawningActor)
+		return nullptr;
+
+	if (CoinValue.IsEmpty())
+		return nullptr;
+
+	const FVector SpawnLocation = GetItemSpawnLocation(SpawningActor, DesiredDropLocation, ClampOnGround);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ADroppedCoins* Item = GetWorld()->SpawnActor<ADroppedCoins>(SpawnLocation, SpawningActor->GetActorRotation(),
+																  SpawnParams);
+	Item->SetReplicates(true);
+	Item->InitializeFromCoinValue(CoinValue);
+
+	return Item;
 }

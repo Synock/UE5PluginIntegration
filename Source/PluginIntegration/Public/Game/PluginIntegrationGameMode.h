@@ -10,12 +10,12 @@
 #include "PluginIntegrationGameMode.generated.h"
 
 UCLASS(minimalapi)
-class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface, public IGameModeChatInterface, public IDialogGameModeInterface
+class APluginIntegrationGameMode : public AGameModeBase, public IInventoryGameModeInterface,
+                                   public IGameModeChatInterface, public IDialogGameModeInterface
 {
 	GENERATED_BODY()
 
 protected:
-
 	//------------------------------------------------------------------------------------------------------------------
 	// Items
 	//------------------------------------------------------------------------------------------------------------------
@@ -32,9 +32,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "Quest")
 	TObjectPtr<UQuestMainComponent> QuestComponent;
 
-
 public:
-
 	APluginIntegrationGameMode();
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -46,6 +44,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void RegisterItem(UInventoryItemBase* NewItem) override;
 
+	// This is a placeholder function that would need to be reimplemented
+	virtual ADroppedItem* SpawnItemFromActor(AActor* SpawningActor, uint32 ItemID,
+	                                         const FVector& DesiredDropLocation, bool ClampOnGround) override;
+
+	// This is a placeholder function that would need to be reimplemented
+	virtual ADroppedCoins* SpawnCoinsFromActor(AActor* SpawningActor, const FCoinValue& CoinValue,
+	                                           const FVector& DesiredDropLocation, bool ClampOnGround) override;
 	//------------------------------------------------------------------------------------------------------------------
 	// Dialogs
 	//------------------------------------------------------------------------------------------------------------------
@@ -53,8 +58,4 @@ public:
 	virtual UDialogMainComponent* GetMainDialogComponent() override { return DialogComponent; }
 
 	virtual UQuestMainComponent* GetMainQuestComponent() override { return QuestComponent; }
-
 };
-
-
-

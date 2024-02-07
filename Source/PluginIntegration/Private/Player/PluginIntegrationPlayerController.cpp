@@ -20,6 +20,9 @@
 #include "Net/UnrealNetwork.h"
 #include <TimerManager.h>
 
+#include "Components/KeyringComponent.h"
+#include "Game/PluginIntegrationGameMode.h"
+
 APluginIntegrationPlayerController::APluginIntegrationPlayerController()
 {
 	bShowMouseCursor = true;
@@ -527,7 +530,63 @@ void APluginIntegrationPlayerController::OnRep_MerchantActor()
 		GetInventoryHUDInterface()->Execute_HideMerchantScreen(GetInventoryHUDObject());
 	}
 }
+//----------------------------------------------------------------------------------------------------------------------
 
+void APluginIntegrationPlayerController::Server_PlayerRemoveKeyToInventory_Implementation(int32 KeyId)
+{
+	Internal_PlayerRemoveKeyToInventory(KeyId);
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+bool APluginIntegrationPlayerController::Server_PlayerRemoveKeyToInventory_Validate(int32 KeyId)
+{
+	return GetKeyring()->HasKey(KeyId);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationPlayerController::Server_PlayerAddKeyFromInventory_Implementation(int32 InTopLeft,
+	EBagSlot InSlot, int32 InItemId)
+{
+	Internal_PlayerAddKeyFromInventory(InTopLeft, InSlot, InItemId);
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+bool APluginIntegrationPlayerController::Server_PlayerAddKeyFromInventory_Validate(int32 InTopLeft, EBagSlot InSlot,
+	int32 InItemId)
+{
+	return PlayerGetItem(InTopLeft, InSlot) == InItemId;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void APluginIntegrationPlayerController::Server_DropItemFromInventory_Implementation(int32 TopLeft, EBagSlot Slot,
+                                                                                     FVector DropLocation)
+{
+	const int32 ItemID = PlayerGetItem(TopLeft, Slot);
+	PlayerRemoveItem(TopLeft, Slot);
+	Cast<APluginIntegrationGameMode>(GetWorld()->GetAuthGameMode())->SpawnItemFromActor(GetMainPlayerCharacter(), ItemID, DropLocation, true);
+}
+
+bool APluginIntegrationPlayerController::Server_DropItemFromInventory_Validate(int32 TopLeft, EBagSlot Slot,
+	FVector DropLocation)
+{
+	return true;
+}
+
+void APluginIntegrationPlayerController::Server_DropItemFromEquipment_Implementation(EEquipmentSlot Slot,
+                                                                                     FVector DropLocation)
+{
+	const int32 ItemID = GetEquipmentForInventory()->GetEquippedItem(Slot)->ItemID;
+	GetEquipmentForInventory()->UnequipItem(Slot);
+	Cast<APluginIntegrationGameMode>(GetWorld()->GetAuthGameMode())->SpawnItemFromActor(GetMainPlayerCharacter(), ItemID, DropLocation, true);
+}
+
+bool APluginIntegrationPlayerController::Server_DropItemFromEquipment_Validate(EEquipmentSlot Slot,
+	FVector DropLocation)
+{
+	return true;
+}
 //----------------------------------------------------------------------------------------------------------------------
 
 UCoinComponent* APluginIntegrationPlayerController::GetBankCoin() const
